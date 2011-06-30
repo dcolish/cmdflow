@@ -1,0 +1,8 @@
+CmdFlow 
+-------
+
+A simple wrapper for creating shell pipelines inside python scripts
+
+Theoretically, this can be used across platforms, but there are a few
+conventions which do not translate well to Windows; i.e. `sudo` is difficult in
+a system that does not use multiple simultaneous users.
