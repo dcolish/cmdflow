@@ -13,7 +13,20 @@ conventions which do not translate well to Windows; i.e. `sudo` is difficult in
 a system that does not use multiple simultaneous users.
 
 .. automodule:: cmdflow
+
+.. autoclass:: Path
    :members:
+
+   .. automethod:: __init__
+
+.. autoclass:: ShellOutput
+   :members:
+
+.. autoclass:: ShellCmd
+   :members:
+
+   .. automethod:: __init__
+
 
 .. toctree::
    :maxdepth: 2

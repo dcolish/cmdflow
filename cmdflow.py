@@ -6,8 +6,23 @@ from subprocess import PIPE, Popen
 
 
 class Path(object):
+    """
+    Provides some methods for building paths. A nice feature is the ability to
+    combine additional `Path`s and/or strings to build a final path. Joining
+    modifies the original `Path`. For example::
 
+        Path("/usr/local") / "bin" / "foo"
+
+    """
     def __init__(self, pathname):
+        """
+        Initialize a Path object::
+
+            Path("/usr/local/")
+
+        :param pathname: named path
+        :type pathname: string
+        """
         self.pathname = pathname
 
     def __repr__(self):
@@ -24,27 +39,36 @@ class Path(object):
         return self
 
     def unlink(self):
+        """
+        Remove the path from the Filesystem
+        """
         unlink(self.pathname)
 
 
 class ShellOutput(namedtuple("ShellOutput", "retcode stdout stderr")):
+    """
+    Manager of output from an executed cmdflow pipeline. Currently this can only
+    redirect from the `ShellCmd`'s stdnout to a file.
+    """
 
     def __gt__(self, b):
         """
-        :param b: will object to redirect the stdout into
+        :param b: object to redirect stdout into
         """
-        self.redirect(b, 'stdout')
+        self.redirect('stdout', b)
 
-    def redirect(self, path_out, fd):
+    def redirect(self, path_out):
+        """
+        :param path_out: filesystem path to direct into
+        """
         if isinstance(path_out, Path):
             path = path_out.pathname
         elif isinstance(path_out, str):
             path = path_out
         else:
             raise ValueError("Cannot redirect to this object")
-
         with open(path, 'w') as out:
-            print >> out, getattr(self, fd)
+            print >> out, self.stdout
 
 
 class ShellCmd(object):
@@ -57,7 +81,15 @@ class ShellCmd(object):
 
     def __init__(self, cmd, env=None):
         """
-        :param cmds: List or string of commands to run."""
+        Initialize a ShellCmd::
+
+            ShellCmd("echo 'hello'")
+
+        :param cmds: commands to run
+        :type cmd: list or string
+        :param env: environment in which to run commands
+        :type env: dict
+        """
         if isinstance(cmd, str):
             cmd = split(cmd)
         assert all(True for word in cmd if 'sudo' == word)
@@ -83,11 +115,26 @@ class ShellCmd(object):
         return self().stdout
 
     def pipe(self, b):
+        """
+        Allows ShellCmd objects to feed input into each other in a style similar
+        to shell pipelines
+
+        :param b: command to append to ShellCmd.cmds
+        :type b: ShellCmd
+        """
+
         if isinstance(b, ShellCmd):
             b.cmds = self.cmds + b.cmds
             return b
 
     def run(self, stdin=()):
+        """
+        Being running `ShellCmd` pipeline
+
+        :param stdin: Passed into stdin in `Popen`'s initializer
+        :type stdin: str or ShellCmd
+        :rtype: `ShellOutput`
+        """
         first = True
         procs = []
         if isinstance(stdin, ShellCmd):
