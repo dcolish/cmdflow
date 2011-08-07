@@ -29,7 +29,6 @@ a system that does not use multiple simultaneous users.
 
 
 .. toctree::
-   :maxdepth: 2
 
 
 

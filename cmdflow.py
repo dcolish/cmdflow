@@ -1,6 +1,20 @@
+"""
+cmdflow
+-------
+
+Collection of classes making up `cmdflow`. The main interface is `ShellCmd`.
+
+To build a pipeline::
+
+    >>> pipeline = ShellCmd("echo 'foo'") | ShellCmd("grep 'f'")
+    >>> print pipeline
+    foo
+
+"""
+
 from collections import namedtuple
 from os import environ, unlink
-from os.path import join as pjoin
+from os.path import expanduser, join as pjoin
 from shlex import split
 from subprocess import PIPE, Popen
 
@@ -23,7 +37,7 @@ class Path(object):
         :param pathname: named path
         :type pathname: string
         """
-        self.pathname = pathname
+        self.pathname = expanduser(pathname)
 
     def __repr__(self):
         return self.pathname
@@ -33,7 +47,7 @@ class Path(object):
             self.pathname = pjoin(self.pathname, b.pathname)
             return self
         elif isinstance(b, str):
-            self.pathname = pjoin(self.pathname, b)
+            self.pathname = pjoin(self.pathname, expanduser(b))
         else:
             raise ValueError("Cannot join object into path")
         return self
@@ -112,7 +126,7 @@ class ShellCmd(object):
         return SudoShellCmd(*self.cmds, env=self.env)
 
     def __repr__(self):
-        return self().stdout
+        return self().stdout.rstrip('\n')
 
     def pipe(self, b):
         """
@@ -122,7 +136,6 @@ class ShellCmd(object):
         :param b: command to append to ShellCmd.cmds
         :type b: ShellCmd
         """
-
         if isinstance(b, ShellCmd):
             b.cmds = self.cmds + b.cmds
             return b
@@ -176,4 +189,15 @@ class SudoShellCmd(ShellCmd):
     """
 
     def __init__(self, shell_cmd):
+        """
+        Initialize SudoShellCmd
+        :param shell_cmd: Command to execute with sudo permissions
+        :type shell_cmd: string
+        """
+
         super(SudoShellCmd, self).__init__(*self.cmds, env=self.env)
+        self.sudo = True
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
