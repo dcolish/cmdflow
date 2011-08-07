@@ -22,8 +22,8 @@ from subprocess import PIPE, Popen
 class Path(object):
     """
     Provides some methods for building paths. A nice feature is the ability to
-    combine additional `Path`s and/or strings to build a final path. Joining
-    modifies the original `Path`. For example::
+    combine additional `Path` objects and/or strings to build a final
+    path. Joining modifies the original `Path`. For example::
 
         Path("/usr/local") / "bin" / "foo"
 
